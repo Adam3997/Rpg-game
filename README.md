@@ -1,0 +1,1 @@
+This is an RPG game. The plan is to have a world to move around in. When you touch an enemy, you will fight a battle against them. If you attack an enemy in the world you can defeat them without having to battle them. 
