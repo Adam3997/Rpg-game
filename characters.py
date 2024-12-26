@@ -5,7 +5,7 @@ import random
 
 
 class Character(Sprite):
-    """"""
+    """This is the class that holds the characters and their attacks. This also holds the deck of moves for the rpg battle. """
 
     def __init__(self,rpg,*stats):
         """"""
@@ -53,20 +53,20 @@ class Character(Sprite):
         deck_size = 0
         
 
-        self.image = pygame.image.load('images1\cat_1_1.bmp')
+        self.image = pygame.image.load('_internal\img\cat_1_1.bmp')
         self.rect = self.image.get_rect()
 
         #self.screen_rect.midleft = self.screen_rect.midleft
         self.rect.y += rpg.screen_height / 4
 
-        self.attack_sprites = [pygame.image.load('images1\cattack_1.bmp'),pygame.image.load('images1\cattack_2.bmp'),pygame.image.load('images1\cattack_3.bmp'),pygame.image.load('images1\cattack_4.bmp'),pygame.image.load('images1\cattack_5.bmp')]
+        self.attack_sprites = [pygame.image.load('_internal\img\cattack_1.bmp'),pygame.image.load('_internal\img\cattack_2.bmp'),pygame.image.load('_internal\img\cattack_3.bmp'),pygame.image.load('_internal\img\cattack_4.bmp'),pygame.image.load('_internal\img\cattack_5.bmp')]
         self.attack_rect1 = [self.attack_sprites[0].get_rect(),self.attack_sprites[1].get_rect,self.attack_sprites[2].get_rect,self.attack_sprites[3].get_rect,self.attack_sprites[4].get_rect]
         
-        self.attack_sprites_r = [pygame.image.load('images1\cattack_1r.bmp'),pygame.image.load('images1\cattack_2r.bmp'),pygame.image.load('images1\cattack_3r.bmp'),pygame.image.load('images1\cattack_4r.bmp'),pygame.image.load('images1\cattack_5r.bmp')]
+        self.attack_sprites_r = [pygame.image.load('_internal\img\cattack_1r.bmp'),pygame.image.load('_internal\img\cattack_2r.bmp'),pygame.image.load('_internal\img\cattack_3r.bmp'),pygame.image.load('_internal\img\cattack_4r.bmp'),pygame.image.load('_internal\img\cattack_5r.bmp')]
         self.attack_rect1_r = [self.attack_sprites_r[0].get_rect(),self.attack_sprites_r[1].get_rect,self.attack_sprites_r[2].get_rect,self.attack_sprites_r[3].get_rect,self.attack_sprites_r[4].get_rect]
-        self.fire_sprites = [pygame.image.load('images1\spark\spark1.bmp'),pygame.image.load('images1\spark\spark2.bmp'),pygame.image.load('images1\spark\spark3.bmp')
-                             ,pygame.image.load('images1\spark\spark4.bmp'),pygame.image.load('images1\spark\spark5.bmp'),pygame.image.load('images1\spark\spark6.bmp')
-                             ,pygame.image.load('images1\spark\spark7.bmp'),pygame.image.load('images1\spark\spark8.bmp'),pygame.image.load('images1\spark\spark9.bmp')
+        self.fire_sprites = [pygame.image.load('_internal\img\spark1.bmp'),pygame.image.load('_internal\img\spark2.bmp'),pygame.image.load('_internal\img\spark3.bmp')
+                             ,pygame.image.load('_internal\img\spark4.bmp'),pygame.image.load('_internal\img\spark5.bmp'),pygame.image.load('_internal\img\spark6.bmp')
+                             ,pygame.image.load('_internal\img\spark7.bmp'),pygame.image.load('_internal\img\spark8.bmp'),pygame.image.load('_internal\img\spark9.bmp')
                              ]
         self.animation_tracker = 0
         self.animation_tracker_r = 0
@@ -76,8 +76,8 @@ class Character(Sprite):
         #locations
         self.x = self.rect.x
         self.y = self.rect.y
-        self.animation_sound = pygame.mixer.Sound('try3.mp3')
-        self.animation_sound.set_volume(0.5)
+        #self.animation_sound = pygame.mixer.Sound('try3.mp3')
+        #self.animation_sound.set_volume(0.5)
     def attack_animation(self):
         """"""
         self.screen.blit(self.attack_sprites[self.animation_tracker],(350,225))
@@ -97,7 +97,7 @@ class Character(Sprite):
        
     def attack_sound(self):
         """"""
-        pygame.mixer.Sound.play(self.animation_sound)
+        #pygame.mixer.Sound.play(self.animation_sound)
     
 
     def create_deck(self):
