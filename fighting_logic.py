@@ -40,8 +40,8 @@ class Fighting_logcic():
 
     
     def reset_stats(self,rpg):
-        rpg.starter_character.health = 50
-        rpg.enemy1.health = 50
+        rpg.starter_character.health = 30
+        rpg.enemy1.health = 30
 
     def health_check(self,rpg): # replace the selfs with rpg 
         """"""
