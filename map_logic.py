@@ -51,12 +51,15 @@ class In_game_map(Sprite):
                 case 1:
                     n = pygame.image.load("_internal\img\\tree1.bmp")
                     n2 = pygame.transform.scale2x(n)
-                    
+                    #self.rect = self.sprite_enemy.surface_list[0].get_rect()
+                    #n2.rect = n2.get_rect()
+
                     self.flowers.append(n2)
                     m = n2.get_rect()
                     self.rect_list.append(m)
                     x = random.randint(-2300,3500)
                     y = random.randint(-2300,3500)
+                    
                     self.rect_list[flowers_count].center = (x,y)
                     flowers_count += 1
                 case 2:

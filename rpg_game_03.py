@@ -1,15 +1,17 @@
 import pygame
 from player import Player
 from characters import Character
-import images1
+#import images1
 from button import Button
 from map_logic import In_game_map
 from enemy_logic import Overworld_person
 #from polygon_parametric import Create_polygon
-from fighting_logic import Fighting_logcic
+#from fighting_logic import Fighting_logcic
 from particles import Particle
 from physics import Physics
 from boss import Boss
+#from sprite_sheet_animater import Sprite_loader
+from trees_builder import Tree_collection
 
 class RPG_game:
     """This is an rpg game with a world to explore. working on the world now."""
@@ -19,79 +21,85 @@ class RPG_game:
     def run_game(self):
         """main loop for the game"""
         pygame.init()
+
+        # set up the screen
         self.screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
         self.screen_width = self.screen.get_rect().width
         self.screen_height = self.screen.get_rect().height
-        
+        # set up the ingame clock/framerate
         self.clock = pygame.time.Clock()
-
+        # this is the physics class
         self.physics_active = Physics(self)
-        
 
+        self.target_framerate = 60
+        self.tree_set = Tree_collection(self)
+
+        
+        # this is the game active boolian
         self.game = True
-        #self.screen = screen.rect
+        # this is variables 
         self.deck_spot = 0
         self.start_menu = False
         self.turn = 0
         self.campagne_fight = False
         self.dt = 0
-        self.movement_speed = 50
-        self.default_speed = self.movement_speed
-        self.accelleration = 20
-        self.deccelleration = 5
-        self.speed_limit = 400
-        self.moving_up = 0
-        self.moving_down = 0
-        self.moving_left = 0
-        self.moving_right  = 0 # this will be used for the momentum. ill redo this later with linear algrebra. 
+        
+        
+        
+         # this will be used for the momentum. ill redo this later with linear algrebra. 
         self.fire_attack = 0
         self.opening_menu = True
 
-      
+        # fonts and screen background color.
         self.font = pygame.font.SysFont(None,48)
         self.text_color = (30,30,30)
         self.bg_color = (250,250,250)
         self.screen_rect = self.screen.get_rect()
         self.screen_color = (190,200,200)
+
+        fps_words = 'FPS: '
+        # words for display 
         words1 = 'Game over!!'
         self.game_over = self.font.render(words1,True,self.text_color,'gray')
         self.game_over_rect = self.game_over.get_rect()
         self.game_over_rect.center = self.screen_rect.center
         self.game_over_rect.centery -= 100
+        # temporary animation stuff
         self.animation_timer = 401
         self.animation_timer2 = 401
         self.animation_length = 400
         self.interval = 80
-        
+        # stuff that will be displayed on the map like trees
         self.map_1 = False
         self.world1 = In_game_map(self)
-        self.world2 = In_game_map(self)
-        self.world3 = In_game_map(self)
-        self.world4 = In_game_map(self)
-        
-        self.player1 = Player(self)
-
+        #self.world2 = In_game_map(self)
+        #self.world3 = In_game_map(self)
+        #self.world4 = In_game_map(self)
+        # the player
+        self.player_1 = Player(self)
+        # the enemies on the map
         self.try1 = Overworld_person(self)
-
+        # these are for the card-game style battle mode.
         self.starter_character = Character(self,10,10,10,10,20)
-        self.enemy1 = Character(self,10,10,10,10,20)
-        self.enemy1.rect.x += (self.screen_width / 4)*3
-        self.enemy1.x = self.enemy1.rect.x
+        #self.enemy1 = Character(self,10,10,10,10,20)
+        #self.enemy1.rect.x += (self.screen_width / 4)*3
+        #self.enemy1.x = self.enemy1.rect.x
         self.starter_character.rect.x += self.screen_width / 10
         self.starter_character.x = self.starter_character.rect.x
-        
+        # this builds up a list of enemies for the ingame world. This will be refactored later. 
         enemy_count = 0
         self.enemy_list = []
-        self.eneny_characters = []
+        #self.eneny_characters = []
         enemy_total = 20
         while enemy_count <= enemy_total:
             """This creates the enemies on the map and gives them some stats."""
             n = Overworld_person(self)
-            m = Character(self,10,10,10,10,50)
+            n.id_number = enemy_count
+            #m = Character(self,10,10,10,10,50)
             self.enemy_list.append(n)
-            self.eneny_characters.append(m)
+            #self.eneny_characters.append(m)
             enemy_count += 1
-        
+        # this builds up a list of particles. again will be refactored as needed. This should get its own class soon 
         self.particle_list_1 = []
         n = 0
         particle_total = 2
@@ -100,14 +108,15 @@ class RPG_game:
             f = Particle(self)
             self.particle_list_1.append(f)
             n += 1
-
+        # this is the boss for the level
         self.level_1_boss = Boss(self)
-        self.fight_demo = Fighting_logcic(self,1,2)
-
+        # fight logic for the demo battle
+        #self.fight_demo = Fighting_logcic(self,1,2)
+        # this is for the demo
         self.start_demo_button = Button(self,'Start Demo',1)
         self.start_demo_button.rect.center = self.screen_rect.center
         self.start_demo_button.prep_msg('Start Demo')
-
+        # this is for the campagne with map and enemies and bosses. 
         self.campagne_mode = False
 
         self.start_campagne_button = Button(self,'',1)
@@ -118,29 +127,34 @@ class RPG_game:
 
         
 
-        self.fight_demo.update_infoboard(self)
+        #self.fight_demo.update_infoboard(self)
+
+
+        # this is the sprite sheet animater
+        
 
 
 
-# stopped here. must do combat engine next. while combat is true stuff goes in loop
+# refactor below soon.
         # this is where the game loop is 
         while self.game:
             for event in pygame.event.get():
-                #print('here')
                 if event.type == pygame.QUIT:
-                    self.game = False
-                    #print('here')
+                    self.game = False   
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
+                    # this checks if you click to start game, or demo. demo currently does not work. will remove later. 
                     self._check_campagne_button(mouse_pos)
-                    self._check_start_demo_button(mouse_pos)
-            self.clock.tick(60)
+                    #self._check_start_demo_button(mouse_pos)
+            self.clock.tick(self.target_framerate)
             self.screen.fill(self.screen_color)
             if self.opening_menu:
+                # this is the starting screen.
                 self.screen.fill(self.screen_color)
-                self.start_demo_button.draw_button()
+                #self.start_demo_button.draw_button()
                 self.start_campagne_button.draw_button()
             if self.start_menu:
+                # this is the demo battle. was used for testing code early on.
                 for event in pygame.event.get():
                     #print('here')
                     if event.type == pygame.QUIT:
@@ -149,21 +163,21 @@ class RPG_game:
                     elif event.type == pygame.MOUSEBUTTONDOWN:
                         #print('here')
                         mouse_pos = pygame.mouse.get_pos()
-                        self.fight_demo._check_attack_1_button(self,mouse_pos)
+                        """self.fight_demo._check_attack_1_button(self,mouse_pos)
                         self.fight_demo._check_attack_2_button(self,mouse_pos)
                         self.fight_demo._check_attack_3_button(self,mouse_pos)
-                        self.fight_demo._check_attack_4_button(self,mouse_pos)
+                        self.fight_demo._check_attack_4_button(self,mouse_pos)"""
                 self.screen.fill(self.screen_color)
-                self.fight_demo.health_check(self)
+                #self.fight_demo.health_check(self)
                 self.starter_character.draw_me(self)
                 self.starter_character.update_deck(self)
-                self.fight_demo.attack_1_button.draw_button()
+                """self.fight_demo.attack_1_button.draw_button()
                 self.fight_demo.attack_2_button.draw_button()
                 self.fight_demo.attack_3_button.draw_button()
-                self.fight_demo.attack_4_button.draw_button()
-                self.enemy1.draw_me(self)
-                self.fight_demo.draw_infoboard(self)
-                if self.animation_timer <= self.animation_length:
+                self.fight_demo.attack_4_button.draw_button()"""
+                #self.enemy1.draw_me(self)
+                #self.fight_demo.draw_infoboard(self)
+                """if self.animation_timer <= self.animation_length: # this will be given its own function to shrink it. 
                     self.starter_character.attack_animation()
                     self.animation_timer += 1
                     if self.animation_timer % self.interval == 0:
@@ -185,49 +199,72 @@ class RPG_game:
                             self.starter_character.animation_spark_track = len(self.starter_character.fire_sprites) - 1
                     self.starter_character.draw_fire(self)
                     #print('here')
-                    self.fire_attack -= 1
-                #self.combat() # the campagnme behgins here#!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                    self.fire_attack -= 1"""
+                #self.combat() 
+                # 
+                # # the campagne begins here#!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             if self.campagne_mode:
                 """This means the player is walking around the game world."""
                 self.screen.fill(self.screen_color)
                 if not self.campagne_fight:
-                    self.physics_active.movement(self)
-                    self.check_attack_in_game()
+                    # this stops physics and attacks while you battle in the card-style battle mode. This is not fighting, and thus physics active.
+                    self.physics_active.movement_2(self)
+                    #self.check_attack_in_game()
                 while self.campagne_fight:
                     """The game will stay in a fight loop until you finish fighting"""
+                    # while fighting no physics or attacks.
                     self.screen.fill('white')
-                    self.fight_demo.check_events_fight(self)
-                    self.fight_demo.draw_fight_screen(self)
+                    """self.fight_demo.check_events_fight(self)
+                    self.fight_demo.draw_fight_screen(self)"""
                     pygame.display.flip()
                 for event in pygame.event.get():
-                    #print('here')
-                    
                     if event.type == pygame.QUIT:
                         self.game = False
-                        #print('here')
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        #print('here')
                         mouse_pos = pygame.mouse.get_pos()
-                     
+                # this is the map section.
                 if self.map_1:
                     self.world1.draw_map()
                     self.try1.draw_me()
                     self.world1.draw_grass()
-                    self.world2.draw_grass()
-                    self.world3.draw_grass()
-                    self.world4.draw_grass()
-                    self.world1.draw_flowers()
-                    self.level_1_boss.draw_me_2()
+                    #self.world2.draw_grass()
+                    #self.world3.draw_grass()
+                    #self.world4.draw_grass()
+                    #self.world1.draw_flowers()
+                    
+                    self.physics_active.detect_collisions_bounce(self)
+                    self.physics_active.detect_collisions_bounce_trees(self)
+                    self.physics_active.enemy_loop(self)
+                    
+                    self.level_1_boss.draw_me()
+                    self.level_1_boss.boss_check(self)
+
+                    self.check_attack_in_game()
+
                     x = len(self.enemy_list)
                     i = 0
                     while i < x:
-                        """"""
+                        """This draws all of the enemies in the list"""
                         self.enemy_list[i].draw_me()
                         i += 1
                     #self.world1.draw_flowers()
-                    self.player1.draw_me(self)
-                    self.particle_list_1[1].check_particle(self)  
-            pygame.display.flip()
+                    self.player_1.draw_me(self)
+                    self.player_1.check_particle_hit(self)
+                    
+                    self.player_1.attack_cycle(self)
+                    self.tree_set.draw_trees()
+                    self.particle_list_1[1].check_particle(self)
+                    #print(self.clock.get_fps())
+                    fps_words = 'FPS: '
+                    fps_words += str(int(self.clock.get_fps()))
+                    self.fps_data = self.font.render(fps_words,True,self.text_color,'gray')
+                    self.fps_data_rect = self.fps_data.get_rect()
+                    self.fps_data_rect.topleft = self.screen_rect.topleft
+                    self.screen.blit(self.fps_data,self.fps_data_rect)
+                    
+
+
+            pygame.display.flip() #update screen.
 
     def check_attack_in_game(self):
         """When you press the space bar this will activate a particle to be drawn on screen and move with momentum to attack enemies with"""
@@ -246,6 +283,7 @@ class RPG_game:
         if keys[pygame.K_SPACE]:
             """"""
             self.particle_list_1[1].spawn_particle(self)
+            
         
     def _check_campagne_button(self,mouse_pos):
         """This checks if you want to start a campagne demo"""
@@ -257,49 +295,7 @@ class RPG_game:
             self.opening_menu = False
             self.map_1 = True 
 
-    def create_overlay(self):
-        """This is an overlay for battle screen. may not be used. """
-        overlay_color = self.screen_color
-        self.rect1 = pygame.Rect(0,0,150,600)
-        self.rect1.midleft = self.screen_rect.midleft
-        self.screen.fill(overlay_color,self.rect1)
-
-        self.rect2 =pygame.Rect(0,0,500,150)
-        self.rect2.topleft = self.screen_rect.topleft
-        self.rect2.y += 50
-        self.screen.fill(overlay_color,self.rect2)
-
-        self.rect3 = pygame.Rect(0,0,150,600)
-        self.rect3.midleft = self.screen_rect.midleft
-        self.rect3.x += 350
-        self.screen.fill(overlay_color,self.rect3)
-
-        self.rect4 = pygame.Rect(0,0,500,60)
-        self.rect4.bottomleft = self.screen_rect.bottomleft
-        self.screen.fill(overlay_color,self.rect4)
-
-    def create_overlay_2(self):
-        """lverlay for player 2 in battle screen. may not be used. """
-        overlay_color = self.screen_color
-        self.rect1 = pygame.Rect(0,0,150,600)
-        self.rect1.midright = self.screen_rect.midright
-        self.rect1.x -= 350
-        self.screen.fill(overlay_color,self.rect1)
-
-        self.rect2 =pygame.Rect(0,0,500,150)
-        self.rect2.topright = self.screen_rect.topright
-        self.rect2.y += 50
-        
-        self.screen.fill(overlay_color,self.rect2)
-
-        self.rect3 = pygame.Rect(0,0,150,600)
-        self.rect3.midright = self.screen_rect.midright
-        
-        self.screen.fill(overlay_color,self.rect3)
-
-        self.rect4 = pygame.Rect(0,0,500,300)
-        self.rect4.bottomright = self.screen_rect.bottomright
-        self.screen.fill(overlay_color,self.rect4)
+   
 
     def _check_start_demo_button(self,mouse_pos):
         """This starts the battle demo"""

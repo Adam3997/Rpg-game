@@ -281,7 +281,7 @@ class Create_polygon(Sprite):
             #self.polygon_list.clear()
             animation_count += 1
         self.polygon_surface.fill((0,0,0))
-        self.rect = pygame.draw.polygon(self.polygon_surface,(self.particle_color),self.nested_polygon_list[1],4)
+        self.rect = pygame.draw.polygon(self.polygon_surface,(self.particle_color),self.nested_polygon_list[1])
 
 
 
