@@ -6,7 +6,7 @@ class Physics_stats():
     """"""
 
 
-    def __init__(self):
+    def __init__(self,rpg):
         """"""
 
         # this will use i,j,k vector notation. i=x, j=y, k=z. Things can be resized slightly to make things jump for example. 
@@ -14,17 +14,14 @@ class Physics_stats():
 
         self.V_x = 0
         self.V_y = 0
-
-        #self.dV_dt = 0
-
-        self.velocity = np.array([[0.0],[0.0]]) # i,j,k or x,y
-        self.dv_dt = np.array([[0.0],[0.0]])
+        
+        self.location = np.array([0.0,0.0]) # location
+        self.velocity = np.array([0.0,0.0]) # i,j,k or x,y since 2D
+        self.dv_dt = np.array([0.0,0.0]) # accelleration
         self.mass = 10
         self.temp = 1
         self.max_speed = 400
-        #print(self.velocity,'in init')
-        self.friction_slowdown = 0.95
-
+        self.friction_slowdown = 0.9
         self.max_acc = 60
         self.min_acc = 5
         self.acc_timer = 1
@@ -35,16 +32,27 @@ class Physics_stats():
 
         self.scaler = 8
 
+        # this is used for the in game map
+        self.map_x_location = 0
+        self.map_y_location = 0
 
-
-        #m = 5
-        #answer = self.Velocity + self.dV_dt
         
-
-        #print(self.Velocity, answer)
     
 
-    def update_speed(self,rpg):
+
+    def update_location(self,rpg):
+        """This updates the location for some particles that use this function"""
+
+        
+        #print(self.velocity[0])
+        self.location[0] +=  self.velocity[0] * rpg.dt
+        self.location[1] +=  self.velocity[1] * rpg.dt
+        self.velocity[0] -= self.velocity[0] * self.friction_slowdown  * rpg.dt # i added delta time to make this framerate dependent.
+        self.velocity[1] -= self.velocity[1] * self.friction_slowdown * rpg.dt
+        #print(self.location[1], ' is x')
+        #print(rpg.dt, ' is rpg.dt')
+
+    def update_speed_stats(self,rpg):
         """"""
         
         #print(self.dv_dt, 'in update speed before')
@@ -60,12 +68,16 @@ class Physics_stats():
         if vector > self.max_speed:
             self.velocity[0] = 0.9 * self.velocity[0]
             self.velocity[1] = 0.9 * self.velocity[1]
-        self.velocity[0] = self.velocity[0] * self.friction_slowdown  
-        self.velocity[1] = self.velocity[1] * self.friction_slowdown 
+        self.velocity[0] -= self.velocity[0] * self.friction_slowdown   * rpg.dt # i added the dt to make this framerate dependent.
+        self.velocity[1] -= self.velocity[1] * self.friction_slowdown  * rpg.dt
+        if abs(self.velocity[0]) < 1:
+            self.velocity[0] = 0
+        if abs(self.velocity[1]) < 1:
+            self.velocity[1] = 0
         
     
     def check_acc_timer_limit(self):
-        print(self.acc_timer)
+        #print(self.acc_timer)
         if self.acc_timer > self.acc_timer_limit:
             self.acc_timer = self.acc_timer_limit
     
