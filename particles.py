@@ -6,7 +6,6 @@ import random
 import math
 import pygame
 
-
 class Particle(Sprite,Physics_stats):
     """this is a class that allows particles to exist for various reasons. """
 
@@ -53,7 +52,6 @@ class Particle(Sprite,Physics_stats):
         self.particle_x_location = self.start_location_x
         self.particle_y_location = self.start_location_y
         
-
         self.post_hit_particle_active = False
         self.post_hit_particle__timer = 45
         self.post_hit_particle__timer_old = self.post_hit_particle__timer
@@ -61,9 +59,7 @@ class Particle(Sprite,Physics_stats):
         self.cut_scene_timer_active_countdown = 120
         self.cut_scene_timer_active_countdown_old = self.cut_scene_timer_active_countdown
         self.cut_scene_particle_active = False
-        
-        
-            
+         
         self.post_impact_particle_list = []
         q = 0
         r = 10
@@ -82,7 +78,6 @@ class Particle(Sprite,Physics_stats):
             #print('creating list')
             q += 1
 
-        
         self.speed_scale = 6
         #print('before')
         self.particle_1 = Create_polygon(rpg,cut_scene=cut_scene)
@@ -139,12 +134,10 @@ class Particle(Sprite,Physics_stats):
             self.particle_x_location = int(self.particle_x_location)
             self.particle_y_location = int(self.particle_y_location)
             
-
             #rpg.screen.blit(self.particle_1.surface_list[self.shape_2_counter],(self.particle_x_location,self.particle_y_location))
             rpg.screen.blit(self.shadow_surface,(self.particle_x_location + 10,self.particle_y_location + 10))
             rpg.screen.blit(self.particle_1.polygon_surface,(self.particle_x_location,self.particle_y_location))
 
-            
             self.shape_2_counter -= 1
             if self.shape_2_counter <= 450:
                 self.shape_2_counter = 450

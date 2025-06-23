@@ -15,7 +15,7 @@ class Night_cycle():
 
         self.shadow_overlay = Shadow_gfx(rpg,'shadow')
         self.day_night_timer = 5000
-        self.day_night_timer_old = self.day_night_timer
+        self.day_night_timer_old = self.day_night_timer + 2000 # this should fix a bug where the first cycle is longer since it does not transition into brightness, it starts fully bright.
         self.night_time = False
 
     def day_night_cycle(self,rpg):

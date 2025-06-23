@@ -138,6 +138,10 @@ class Boss(Overworld_person,Physics_stats):
                 self.fire_circle_level_1.spawn_rocket(rpg,x,y)
                 self.armor = 400
                 self.armor_old = self.armor
+        
+        self.weakness_rect = pygame.Rect(0,0,250,250)
+        self.weakness_rect.center = (x,y)
+
         self.rect_attack_right = pygame.Rect(0,0,100,200)
         self.rect_attack_left = pygame.Rect(0,0,100,200)
         self.rect_attack_up = pygame.Rect(0,0,200,100)
@@ -167,7 +171,7 @@ class Boss(Overworld_person,Physics_stats):
         self.fire_attack_scale = 10
         self.x = self.rect.x
         self.y = self.rect.y
-        self.health = 300   # 120 is decent amount
+        self.health = 2 #300   # 120 is decent amount
         self.helper_list = []
         self.boss_attack_delay = self.animation_length
         self.boss_attack_timer = 10
@@ -285,6 +289,7 @@ class Boss(Overworld_person,Physics_stats):
                 self.fireball_list_war_invoke_2[i].fire_ball_rect.x += self.fireball_list_war_invoke_2[i].velocity[0] * rpg.dt
                 self.fireball_list_war_invoke_2[i].fire_ball_rect.y += self.fireball_list_war_invoke_2[i].velocity[1] * rpg.dt
                 i += 1
+    
     def reset_fireball_war_attack(self):
         """This returns the fireball to its start and removes any velocity""" # this must  be called at first to stop it being in corner for first use.
         i = 0
@@ -348,8 +353,6 @@ class Boss(Overworld_person,Physics_stats):
                 
                 i += 1
 
-            
-
     def boss_overlay(self,rpg):
         """This will show the boss health""" # this can be modified to add a weakness for certian situations.
         if self.hypotenuse_boss_player_1 <= 1000:
@@ -358,10 +361,11 @@ class Boss(Overworld_person,Physics_stats):
             if color > 120:
                 color = 120
                 color_2 = 100
+            if color < 0 :
+                color = 0
             if color_2 < 0:
                 color_2 = 0
             pygame.draw.line(self.screen,(100,color,color_2),(self.rect_2.centerx - (2 * self.health/2),self.rect_2.centery - 50),(self.rect_2.centerx + (2 * self.health / 2),self.rect_2.centery - 50),20)
-
 
     def war_attack_loop(self,rpg):
         """This is the war attack code"""
@@ -379,8 +383,6 @@ class Boss(Overworld_person,Physics_stats):
         a = 0
         b = len(self.fire_circle_level_1.fire_circle_active_list) - 1
         
-
-
         while a <= b :
             collisions_test  = pygame.Rect.colliderect(self.fire_circle_level_1.rect_circle_spell_list[a],rpg.level_stuff.player_1.rect)
             if collisions_test:
@@ -390,12 +392,8 @@ class Boss(Overworld_person,Physics_stats):
                     self.armor -= 10
                     rpg.level_stuff.sound_logic.fire_crackle_sound.set_volume(rpg.settings_hold.max_volume)
                     pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.fire_crackle_sound)
-                    
-                        
                 
             a += 1
-
-
 
     def delete_me(self,rpg):
         """deletes the enemy. The location change is nessecary for other code checking its location to not trigger."""
@@ -432,7 +430,6 @@ class Boss(Overworld_person,Physics_stats):
                 self.fireball_list_x[i].dv_dt[0] +=  r * s
                 self.fireball_list_x[i].dv_dt[1] +=  r * s2
                 i += 1
-
 
     def spawn_fireball(self,rpg):
         """This spawns the fireball for an attack by the boss."""
@@ -522,7 +519,6 @@ class Boss(Overworld_person,Physics_stats):
             self.fireball_list_x[i].fire_ball_rect.y += self.fireball_list_x[i].y_offset
             i += 1
     
-    
     def fireball_check_and_draw(self,rpg):
         """This checks for the activity of fireball and draws it on screen if its active"""
         if self.fire_active_1  == True:
@@ -611,8 +607,49 @@ class Boss(Overworld_person,Physics_stats):
         self.y_rect = pygame.Rect(0,0,10,abs(self.y_amount))
         self.x_rect.topleft = self.rect_2.center
         self.y_rect.topleft = self.rect_2.center
-        if self.health <= 0:    # this is where the boss dies i need to make it a function soon 
+        self.check_boss_health(rpg)
+                       
+        if self.fire_active_1:
+            self.fireball_list[0].fire_ball_lifespan -= 1
+        if self.fireball_list[0].fire_ball_lifespan <= 0:
+            self.fireball_list[0].fire_ball_lifespan = self.fireball_list[0].fire_ball_lifespan_old
+            self.fire_active_1 = False
+            self.reset_fireball()
+        if self.fireball_x_attack_active:
+            self.fireball_list_x[0].fire_ball_lifespan -= 1
+        if self.fireball_list_x[0].fire_ball_lifespan <= 0:
+            self.fireball_list_x[0].fire_ball_lifespan = self.fireball_list_x[0].fire_ball_lifespan_old
+            self.fireball_x_attack_active = False
+            self.reset_fireball_x()
+
+        if self.animation_counter >= len(self.sprite_enemy.surface_list):
+            self.animation_counter = len(self.sprite_enemy.surface_list) - 1
+        if self.hypotenuse_boss_player_1 <= 1000: 
+                    
+            self.fireball_list[0].fire_ball_countdown -= 1
+            if self.fireball_list[0].fire_ball_countdown == 30:
+                rpg.level_stuff.sound_logic.splat_rev_sound.set_volume(rpg.settings_hold.max_volume)
+
+                pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.splat_rev_sound)
+            if self.fireball_list[0].fire_ball_countdown <= 0:
+                
+                self.a = random.choice([0,1])
+                if self.invoke_war_attack:
+                    self.a = random.choice([0,1,2,2,2])
+                if self.a == 0:
+                    self.spawn_x_fireball(rpg) # i added this, it needs testing. this line may be casuing a bug if this is read later. 2/19/25 # i dont think there is a bug. 6/14/25
+                if self.a == 1:
+                    self.spawn_fireball(rpg)
+                if self.a == 2:
+                    self.spawn_war_attack(rpg)
+                self.fireball_list[0].fire_ball_countdown = self.fireball_list[0].fire_ball_countdown_old
+
+    def check_boss_health(self,rpg):
+        """This checks the health of the boss.""" # this works for when alternate ddeath method is false. when true needs to be added next. 
+        if self.health <= 0 and self.alternate_death_method == False:    # this is where the boss dies i need to make it a function soon # i must remake this into a function now.
             #rpg.campagne_mode = False
+            rpg.loading_screen.draw_loading_screen()
+            pygame.display.update()
             self.delete_me(rpg)
             if rpg.level_stuff.level_1:
                 if self.one_switch:
@@ -643,57 +680,55 @@ class Boss(Overworld_person,Physics_stats):
                     rpg.win_game_screen = True
                     rpg.campagne_mode = False
                     self.one_switch = False
-                
-        if self.fire_active_1:
-            self.fireball_list[0].fire_ball_lifespan -= 1
-        if self.fireball_list[0].fire_ball_lifespan <= 0:
-            self.fireball_list[0].fire_ball_lifespan = self.fireball_list[0].fire_ball_lifespan_old
-            self.fire_active_1 = False
-            self.reset_fireball()
-        if self.fireball_x_attack_active:
-            self.fireball_list_x[0].fire_ball_lifespan -= 1
-        if self.fireball_list_x[0].fire_ball_lifespan <= 0:
-            self.fireball_list_x[0].fire_ball_lifespan = self.fireball_list_x[0].fire_ball_lifespan_old
-            self.fireball_x_attack_active = False
-            self.reset_fireball_x()
-
-        if self.animation_counter >= len(self.sprite_enemy.surface_list):
-            self.animation_counter = len(self.sprite_enemy.surface_list) - 1
-        if self.hypotenuse_boss_player_1 <= 1000: 
-                    
-            self.fireball_list[0].fire_ball_countdown -= 1
-            if self.fireball_list[0].fire_ball_countdown == 30:
-                rpg.level_stuff.sound_logic.splat_rev_sound.set_volume(rpg.settings_hold.max_volume)
-
-                pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.splat_rev_sound)
-            if self.fireball_list[0].fire_ball_countdown <= 0:
-                
-                self.a = random.choice([0,1])
-                if self.invoke_war_attack:
-                    self.a = random.choice([0,1,2,2,2])
-                if self.a == 0:
-                    self.spawn_x_fireball(rpg) # i added this, it needs testing. this line may be casuing a bug if this is read later. 2/19/25
-                if self.a == 1:
-                    self.spawn_fireball(rpg)
-                if self.a == 2:
-                    self.spawn_war_attack(rpg)
-                self.fireball_list[0].fire_ball_countdown = self.fireball_list[0].fire_ball_countdown_old
-
+        
+        if self.health <= 0 and self.alternate_death_method:    # this is where the boss dies i need to make it a function soon # i must remake this into a function now.
+            #rpg.campagne_mode = False
+            if rpg.level_stuff.player_1.health <= 0:
+                self.delete_me(rpg)
+                if rpg.level_stuff.level_1:
+                    if self.one_switch:
+                        rpg.level_stuff.first_to_second_level_switch(rpg)
+                        self.one_switch = False
+                        #print('level 1 switch')
+                if rpg.level_stuff.level_2:
+                    if self.one_switch:
+                        self.one_switch = False
+                        rpg.level_stuff.second_to_third_level_switch(rpg)
+                        #print('level 2 switch')
+                if rpg.level_stuff.level_3:
+                    if self.one_switch:
+                        rpg.level_stuff.third_to_fourth_level_switch(rpg)
+                        self.one_switch = False
+                        #print('level 3 switch')
+                if rpg.level_stuff.level_4:
+                    if self.one_switch:
+                        rpg.level_stuff.fourth_to_fifth_level_switch(rpg)
+                        self.one_switch = False
+                if rpg.level_stuff.level_5:
+                    if self.one_switch:
+                        rpg.level_stuff.fifth_to_sixth_level_switch(rpg)
+                        self.one_switch = False
+                if rpg.level_stuff.level_6:
+                    if self.one_switch:
+                        rpg.high_score_stuff.add_score(rpg.level_stuff.player_1.score)
+                        rpg.win_game_screen = True
+                        rpg.campagne_mode = False
+                        self.one_switch = False
 
     def draw_me(self,rpg):
         """draws the boss from the surface to the screen. """
         
         self.drawing_stuff(rpg)
+        #pygame.draw.rect(self.screen,(200,0,0),self.weakness_rect)
         self.screen.blit(self.sprite_enemy.surface_list[self.animation_counter],(self.rect))
+        #pygame.draw.rect(self.screen,(0,200,200),self.weakness_rect)
         self.detect_collision_fire_circle_level_1(rpg)
         self.boss_overlay(rpg)
         self.draw_circle_spots(rpg)
         self.fireball_check_and_draw(rpg)
         self.fireball_x_check_and_draw(rpg)
         self.war_attack_loop(rpg)
-            
-
-   
+    
     def check_direct_attack_hit(self,rpg):
         """""" # 0up , 10 left, 20 down, 30 right,
         if self.animation_counter == 2:
@@ -760,60 +795,76 @@ class Boss(Overworld_person,Physics_stats):
                 if 0 <= self.angle_boss_player_1 <= 45:
                     self.animation_counter = 34
                     self.animation_counter_old = self.animation_counter 
+                    self.weakness_rect.center = self.rect_attack_left.center
                     # 4up , 14 left, 24 down, 34 right, 
                 if 45 < self.angle_boss_player_1 <= 90:
                     self.animation_counter = 4
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_down.center
                 if -45 <= self.angle_boss_player_1 < 0:
                     self.animation_counter = 34
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_left.center
                 if -90 <= self.angle_boss_player_1 < -45:
                     self.animation_counter = 24
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_up.center
             if self.x_calc < 0:
                 if 0 <= self.angle_boss_player_1 <= 45:
                     self.animation_counter = 14
                     self.animation_counter_old = self.animation_counter 
+                    self.weakness_rect.center = self.rect_attack_right.center
                     # 4up , 14 left, 24 down, 34 right, 
                 if 45 < self.angle_boss_player_1 <= 90:
                     self.animation_counter = 4
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_down.center
                 if -45 <= self.angle_boss_player_1 < 0:
                     self.animation_counter = 14
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_right.center
                 if -90 <= self.angle_boss_player_1 < -45:
                     self.animation_counter = 24
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_up.center
         if self.attack == True:
             #self.check_direct_attack_hit(rpg)
             if self.x_calc >= 0:
                 if 0 <= self.angle_boss_player_1 <= 45:
                     self.animation_counter = 30
                     self.animation_counter_old = self.animation_counter 
+                    self.weakness_rect.center = self.rect_attack_left.center
                     # 4up , 14 left, 24 down, 34 right, 
                 if 45 < self.angle_boss_player_1 <= 90:
                     self.animation_counter = 0
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_down.center
                 if -45 <= self.angle_boss_player_1 < 0:
                     self.animation_counter = 30
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_left.center
                 if -90 <= self.angle_boss_player_1 < -45:
                     self.animation_counter = 20
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_up.center
             if self.x_calc < 0:
                 if 0 <= self.angle_boss_player_1 <= 45:
                     self.animation_counter = 10
                     self.animation_counter_old = self.animation_counter 
+                    self.weakness_rect.center = self.rect_attack_right.center
                     # 4up , 14 left, 24 down, 34 right, 
                 if 45 < self.angle_boss_player_1 <= 90:
                     self.animation_counter = 0
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_down.center
                 if -45 <= self.angle_boss_player_1 < 0:
                     self.animation_counter = 10
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_right.center
                 if -90 <= self.angle_boss_player_1 < -45:
                     self.animation_counter = 20
                     self.animation_counter_old = self.animation_counter
+                    self.weakness_rect.center = self.rect_attack_up.center
 
     def boss_check(self,rpg):
         """This holds the boss loop and activities"""
@@ -892,7 +943,6 @@ class Wolf_boss():
             self.wolf_list.append(a)
             n += 1
 
-
     def delete_me(self,rpg):
         """deletes the enemy. The location change is nessecary for other code checking its location to not trigger."""
         rpg.level_stuff.player_1.score += self.score_value
@@ -941,7 +991,6 @@ class Wolf_boss():
                 
             
     def draw_wolves_for_boss(self,rpg):
-
 
         self.check_for_end_of_boss(rpg)
         self.n_for_draw = 0

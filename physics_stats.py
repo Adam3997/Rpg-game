@@ -3,12 +3,10 @@ import random
 
 
 class Physics_stats():
-    """"""
+    """This holds the individual exogenous variables used by the physics system. Each thing in the physics simulation inherits this."""
 
 
     def __init__(self,rpg):
-        """"""
-
         # this will use i,j,k vector notation. i=x, j=y, k=z. Things can be resized slightly to make things jump for example. 
         self.id_number = 0
 
@@ -36,14 +34,11 @@ class Physics_stats():
         self.map_x_location = 0
         self.map_y_location = 0
 
-        
-    
-
+   
 
     def update_location(self,rpg):
         """This updates the location for some particles that use this function"""
 
-        
         #print(self.velocity[0])
         self.location[0] +=  self.velocity[0] * rpg.dt
         self.location[1] +=  self.velocity[1] * rpg.dt
@@ -53,7 +48,7 @@ class Physics_stats():
         #print(rpg.dt, ' is rpg.dt')
 
     def update_speed_stats(self,rpg):
-        """"""
+        """This updates the speed"""
         
         #print(self.dv_dt, 'in update speed before')
 
@@ -70,10 +65,15 @@ class Physics_stats():
             self.velocity[1] = 0.9 * self.velocity[1]
         self.velocity[0] -= self.velocity[0] * self.friction_slowdown   * rpg.dt # i added the dt to make this framerate dependent.
         self.velocity[1] -= self.velocity[1] * self.friction_slowdown  * rpg.dt
-        if abs(self.velocity[0]) < 1:
+        if abs(self.velocity[0]) < 190: # this makes stuff stop.
             self.velocity[0] = 0
-        if abs(self.velocity[1]) < 1:
-            self.velocity[1] = 0
+        if abs(self.velocity[1]) < 190:
+            self.velocity[1] = 0 # if below doesnt work i can use the old setup.
+        #print(vector,self.dv_dt)
+
+        """if vector <= 50:
+            self.velocity[0] = 0
+            self.velocity[1] = 0"""
         
     
     def check_acc_timer_limit(self):
@@ -82,7 +82,7 @@ class Physics_stats():
             self.acc_timer = self.acc_timer_limit
     
     def accellerate_up(self,rpg):
-        """"""
+        """causes a upward accelleration"""
         #self.check_acc_timer_limit()
        
         self.dv_dt[1] -= ( random.randint(self.min_acc,self.max_acc))  

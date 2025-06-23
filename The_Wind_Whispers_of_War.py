@@ -11,6 +11,7 @@ from save_load_game import Save_and_load_game
 from opening import Opening
 from opening import Top_Scores
 from Settings import Settings
+from level_logic import Loading_screen_and_logic
 
 
 
@@ -21,6 +22,7 @@ class RPG_game:
     def run_game(self):
         """The game is started with this function"""
         pygame.init()
+        
 
         self.game = True
 
@@ -56,8 +58,19 @@ class RPG_game:
 
         self.clock = pygame.time.Clock()
 
+
+        # going to add a load screen here
+        
         # creating the highscores, main menu, save files stuff, level logic, pause menu, night cycle and framerate info.
         # it is currently locked to 60 framerate.
+
+        self.loading_screen = Loading_screen_and_logic(self)
+        self.loading_screen_active = False
+
+        # this is an attempt at a loading screen.
+        """self.screen.fill((255,255,255))
+        self.loading_screen.draw_loading_screen()
+        pygame.display.update()"""
         
         self.high_score_stuff = Top_Scores(self)
 
@@ -73,10 +86,10 @@ class RPG_game:
         self.target_framerate = 60
         
         self.time_tracker = 0
+
+        self.clock.tick(self.target_framerate)
         
         # this is the game active boolian
-        
-        
         
         # this is the test cut screne that made it into the game
 
@@ -161,6 +174,8 @@ class RPG_game:
         # this is where the game loop is, and order of calculations.
          
         while self.game:
+            if self.loading_screen_active:
+                self.loading_screen.draw_loading_screen()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.game = False   
@@ -172,7 +187,7 @@ class RPG_game:
             self.level_system()
             if self.campagne_mode:
                 """This means the player is walking around the game world."""
-                self.screen.fill(self.screen_color)
+                self.screen.fill(self.level_stuff.level_design.current_background_color)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.game = False
@@ -187,13 +202,13 @@ class RPG_game:
                 while self.pause_menu.pause_active:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
-                            self.game = False   
+                            self.game = False 
+                            self.pause_menu.pause_active = False  
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             mouse_pos = pygame.mouse.get_pos()
                             self.pause_menu.check_to_save(self,mouse_pos)
                             self.pause_menu.check_to_unpause(mouse_pos)
-                            self.pause_menu.check_hint_button(mouse_pos)
-                            
+                            self.pause_menu.check_hint_button(mouse_pos)        
                     self.pause_menu.draw_pause_screen()
                     pygame.display.flip()
             if self.game_over_screen:
@@ -227,13 +242,16 @@ class RPG_game:
         self.level_stuff.physics_active.momentum_3(self)
         self.level_stuff.player_1.death_animation_logic(self)  
         self.level_stuff.physics_active.detect_collisions_bounce(self)
-        self.level_stuff.physics_active.detect_collisions_bounce_trees(self)
+        if self.level_stuff.level_design.level_type == 'forest':
+            self.level_stuff.physics_active.detect_collisions_bounce_trees(self)
+        if self.level_stuff.level_design.level_type == 'lava':
+            self.level_stuff.physics_active.update_lava(self)
         if self.level_stuff.boss_type == 'spider':
             self.level_stuff.physics_active.detect_collisions_bounce_boss(self)
         if self.level_stuff.boss_type == 'wolf':
             self.level_stuff.physics_active.detect_collisions_bounce_wolf(self)
         self.level_stuff.physics_active.enemy_loop(self)
-        self.level_stuff.physics_active.update_town(self)
+        #self.level_stuff.physics_active.update_town(self)
         self.check_attack_in_game()
 
     def level_system(self):
@@ -366,8 +384,12 @@ class RPG_game:
 
     def drawing_system(self):
         """Holds stuff that gets drawn on screen."""
-        self.level_stuff.grass_decorations.draw_grass(self)
-        self.world1.draw_grass() 
+        if self.level_stuff.level_design.level_type == 'forest':
+            self.level_stuff.grass_decorations.draw_grass(self)
+            #self.world1.draw_grass() 
+        if self.level_stuff.level_design.level_type == 'lava':
+            self.level_stuff.level_design.draw_objects_for_lava_level(self)
+        
         x = len(self.level_stuff.enemy_list)
         i = 0
         while i < x:
@@ -385,12 +407,14 @@ class RPG_game:
         if self.level_stuff.town_exists:
             self.level_stuff.town_1.draw_town()
         self.draw_items()
-        self.level_stuff.generic_items.draw_items_generic(self)
+        if self.level_stuff.level_design.level_type == 'forest':
+            self.level_stuff.generic_items.draw_items_generic(self)
         if self.level_stuff.player_1.death_animation_active == False:
             self.level_stuff.player_1.draw_me(self)
         if self.level_stuff.player_1.death_animation_active:
             self.level_stuff.player_1.draw_death_stuff()
-        self.level_stuff.tree_set.draw_trees()  
+        if self.level_stuff.level_design.level_type == 'forest':
+            self.level_stuff.tree_set.draw_trees()  
         self.level_stuff.player_1.attack_cycle(self)
         
         self.level_stuff.particle_list_1[1].check_particle(self)
@@ -554,6 +578,9 @@ class RPG_game:
     def reset_campagne(self):
         """This resets the stuff for the game to work when restarting"""
         # resets start here
+        self.loading_screen_active = True
+        self.loading_screen.draw_loading_screen()
+        pygame.display.update()
 
         self.level_stuff.load_level_1(self)
         self.level_stuff.reset_player(self)
@@ -563,6 +590,7 @@ class RPG_game:
         self.campagne_mode = False
         self.map_1 = False
         self.overlay_test = Info_overlay(self)
+        self.loading_screen_active = False
     
    
 

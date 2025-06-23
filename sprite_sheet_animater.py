@@ -393,3 +393,102 @@ class Sprite_loader():
                         n = 0
                         if y_count >=self.y_count_total:
                             n = m + 1
+            
+            
+            if number == 'golem': # this will have a *args usage
+                """This is for the golem"""
+                image_temp = pygame.image.load(file_name)
+                set_colorkey = (0,0,255) # 255 is white 0 is black
+                fill_in = (0,0,255)
+                self.image_wide = 64
+                self.image_high = 64
+                self.offset_x = 0
+                offset_y = 0
+                step_size_x = 64
+                step_size_y = 64
+
+                y_count = 0
+                self.surface_list = []
+
+                #set_colorkey = (0,0,0)
+                #fill_in = (0,0,0)
+                self.y_count_total = 4 # this is the number of downward steps
+
+                n = 0
+                m = 9 # this is the number of eastward steps
+
+                while n <= m:
+                    # creates a surface to save the image to.
+                    surface_1 = pygame.Surface((self.image_wide,self.image_high))
+                    surface_1.fill(fill_in)
+                    surface_1.set_colorkey(set_colorkey)
+                    x = self.offset_x + (step_size_x * n * (-1))
+                    y = offset_y + (step_size_y * y_count * (-1))
+                    # adds the part of the image to the surface
+                    # the surface is smaller than the image so it will only show a piece of the total image.
+                    surface_1.blit(image_temp,(x,y))
+                    surface_1.get_rect()
+                    # this is a list that holds all of the surfaces.
+                    # each surface will have a image on it. if it works.
+                    surface_1 = pygame.transform.scale2x(surface_1) 
+                    self.surface_list.append(surface_1)
+                    # the below should work to scan across image
+                    if n <(m - 1):
+                        n += 1
+                    if n == (m - 2):
+                        # when we reach the right side, we move down a step and back to the left side.
+                        y_count += 1
+                        n = 0
+                        if y_count >=self.y_count_total:
+                            n = m + 1
+                
+
+                image_temp = pygame.image.load(args[0])
+                set_colorkey = (0,0,255) # 255 is white 0 is black
+                fill_in = (0,0,255)
+                self.image_wide = 64
+                self.image_high = 96
+                self.offset_x = 0
+                offset_y = 0
+                step_size_x = 64
+                step_size_y = 96
+
+                y_count = 0
+                #self.surface_list = []
+
+                #set_colorkey = (0,0,0)
+                #fill_in = (0,0,0)
+                self.y_count_total = 4 # this is the number of downward steps
+
+                n = 0
+                m = 9 # this is the number of eastward steps
+
+                while n <= m:
+                    # creates a surface to save the image to.
+                    surface_1 = pygame.Surface((self.image_wide,self.image_high))
+                    surface_1.fill(fill_in)
+                    surface_1.set_colorkey(set_colorkey)
+                    x = self.offset_x + (step_size_x * n * (-1))
+                    y = offset_y + (step_size_y * y_count * (-1))
+                    # adds the part of the image to the surface
+                    # the surface is smaller than the image so it will only show a piece of the total image.
+                    surface_1.blit(image_temp,(x,y))
+                    surface_1.get_rect()
+                    # this is a list that holds all of the surfaces.
+                    # each surface will have a image on it. if it works.
+                    surface_1 = pygame.transform.scale2x(surface_1) 
+                    self.surface_list.append(surface_1)
+                    # the below should work to scan across image
+                    if n <(m - 1):
+                        n += 1
+                    if n == (m - 2):
+                        # when we reach the right side, we move down a step and back to the left side.
+                        y_count += 1
+                        n = 0
+                        if y_count >=self.y_count_total:
+                            n = m + 1
+
+
+
+
+

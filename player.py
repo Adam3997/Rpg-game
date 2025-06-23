@@ -17,7 +17,7 @@ class Player(Sprite,Physics_stats):
         super().__init__()
         self.stab_damage = 10
         self.stab_damage_old = self.stab_damage
-        self.score = 100000
+        self.score = 0
         self.health = 100    #100 
         self.movement_delay = 200
         self.mass = 2 # this represents 84 kilograms
@@ -38,7 +38,8 @@ class Player(Sprite,Physics_stats):
         self.magic_animation_active = False
         self.magic_animation_delay = 10
         self.magic_animation_delay_old = self.magic_animation_delay
-
+        
+        # ritual life added +1
         self.extra_life_invoked = False
 
 
@@ -132,7 +133,8 @@ class Player(Sprite,Physics_stats):
             self.change_accelleration()
             #print('acc changed')
             self.movement_delay = 200
-        self.update_speed(rpg)
+        #self.update_speed(rpg)
+
         self.rect.x += self.velocity[0] * rpg.dt
         self.rect.y += self.velocity[1] * rpg.dt
     
@@ -160,11 +162,6 @@ class Player(Sprite,Physics_stats):
                 rpg.campagne_mode = False
                 rpg.game_over_screen = True
 
-
-
-    def check_particle_hit_tree(self,rpg):
-        """This is for the particle hitting a tree."""
-
     # i need to add one for checking if particle hits a tree.
     def check_particle_hit(self,rpg):
         """this checks if the particle hits an enemy or boss"""
@@ -179,6 +176,21 @@ class Player(Sprite,Physics_stats):
                     if rpg.level_stuff.particle_list_1[1].damage > rpg.level_stuff.level_1_boss.armor:
                         rpg.level_stuff.level_1_boss.health -= rpg.level_stuff.particle_list_1[1].damage
                         rpg.overlay.create_damage_for_overlay(rpg.level_stuff.particle_list_1[1].damage,rect_particle.center,'cyan')
+                        rpg.level_stuff.particle_list_1[1].damage -= rpg.level_stuff.particle_list_1[1].damage
+                        if rpg.level_stuff.particle_list_1[1].damage < 0:
+                            rpg.level_stuff.particle_list_1[1].damage = 0
+                    if rpg.level_stuff.particle_list_1[1].post_hit_particle_active == False:
+                            rpg.level_stuff.particle_list_1[1].accellerate_post_hit_particles(rpg)
+                    rpg.level_stuff.particle_list_1[1].post_hit_particle_active = True
+                    #rpg.level_stuff.particle_list_1[1].accellerate_post_hit_particles(rpg)
+                    rpg.level_stuff.particle_list_1[1].reset_particle(rpg) # collision for boss here
+            collisions_test_boss = pygame.Rect.colliderect(rect_particle,rpg.level_stuff.level_1_boss.weakness_rect) # this will do double damage.
+            if collisions_test_boss:
+                pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.particle_hit_sound)
+                if rpg.level_stuff.boss_type == 'spider':
+                    if (rpg.level_stuff.particle_list_1[1].damage * 2) > rpg.level_stuff.level_1_boss.armor:
+                        rpg.level_stuff.level_1_boss.health -= (rpg.level_stuff.particle_list_1[1].damage * 2)
+                        rpg.overlay.create_damage_for_overlay((rpg.level_stuff.particle_list_1[1].damage * 2),rect_particle.center,'blue')
                         rpg.level_stuff.particle_list_1[1].damage -= rpg.level_stuff.particle_list_1[1].damage
                         if rpg.level_stuff.particle_list_1[1].damage < 0:
                             rpg.level_stuff.particle_list_1[1].damage = 0
@@ -273,6 +285,17 @@ class Player(Sprite,Physics_stats):
                                 pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.stab_sound)
                                 self.stab_damage -= self.stab_damage
                                 rpg.stab_sound_limit -= 1
+                    
+                    collisions_test_boss = pygame.Rect.colliderect(self.rect_attack_right,rpg.level_stuff.level_1_boss.weakness_rect)
+                    if collisions_test_boss:
+                        if (self.stab_damage*2) > rpg.level_stuff.level_1_boss.armor:
+                            rpg.level_stuff.level_1_boss.health -= (self.stab_damage * 2)
+                            rpg.overlay.create_damage_for_overlay((self.stab_damage * 2),self.rect_attack_right.center,'blue')
+                            self.stab_damage -= self.stab_damage
+                        if rpg.stab_sound_limit > 0:   
+                                pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.stab_sound)
+                                self.stab_damage -= self.stab_damage
+                                rpg.stab_sound_limit -= 1
                     #print('hit with attack')
                 if rpg.level_stuff.boss_type == 'wolf':
                     n = 0
@@ -317,6 +340,20 @@ class Player(Sprite,Physics_stats):
 
                                 rpg.stab_sound_limit -= 1
                         self.stab_damage -= self.stab_damage
+                    
+                    collisions_test_boss = pygame.Rect.colliderect(self.rect_attack_left,rpg.level_stuff.level_1_boss.weakness_rect)
+                    if collisions_test_boss:
+                        if (self.stab_damage*2) > rpg.level_stuff.level_1_boss.armor:
+                            rpg.level_stuff.level_1_boss.health -= (self.stab_damage * 2)
+                            #rpg.overlay.create_damage_for_overlay(self.stab_damage,self.rect_attack_left.center,'cyan')
+                            #self.stab_damage -= self.stab_damage
+                        if rpg.stab_sound_limit > 0:
+                                pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.stab_sound)
+                                rpg.overlay.create_damage_for_overlay(self.stab_damage*2,self.rect_attack_left.center,'purple')
+
+                                rpg.stab_sound_limit -= 1
+                        self.stab_damage -= self.stab_damage
+                
                 if rpg.level_stuff.boss_type == 'wolf':
                     n = 0
                     m = len(rpg.level_stuff.level_1_boss.wolf_list) - 1
@@ -357,6 +394,19 @@ class Player(Sprite,Physics_stats):
                         if rpg.stab_sound_limit > 0:
                                 pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.stab_sound)
                                 rpg.overlay.create_damage_for_overlay(self.stab_damage,self.rect_attack_up.center,'cyan')
+                                rpg.stab_sound_limit -= 1
+                        self.stab_damage -= self.stab_damage
+                        #print('hit with attack')
+                    
+                    collisions_test_boss = pygame.Rect.colliderect(self.rect_attack_up,rpg.level_stuff.level_1_boss.weakness_rect)
+                    if collisions_test_boss:
+                        if (self.stab_damage*2) > rpg.level_stuff.level_1_boss.armor:
+                            rpg.level_stuff.level_1_boss.health -= self.stab_damage*2
+                            #rpg.overlay.create_damage_for_overlay(self.stab_damage,self.rect_attack_up.center,'cyan')
+                            #self.stab_damage -= self.stab_damage
+                        if rpg.stab_sound_limit > 0:
+                                pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.stab_sound)
+                                rpg.overlay.create_damage_for_overlay(self.stab_damage*2,self.rect_attack_up.center,'purple')
                                 rpg.stab_sound_limit -= 1
                         self.stab_damage -= self.stab_damage
                         #print('hit with attack')
@@ -404,6 +454,20 @@ class Player(Sprite,Physics_stats):
                                 rpg.stab_sound_limit -= 1
                         self.stab_damage -= self.stab_damage
                     #print('hit with attack')
+
+                    collisions_test_boss = pygame.Rect.colliderect(self.rect_attack_down,rpg.level_stuff.level_1_boss.weakness_rect)
+                    if collisions_test_boss:
+                        if self.stab_damage*2 > rpg.level_stuff.level_1_boss.armor:
+                            rpg.level_stuff.level_1_boss.health -= self.stab_damage*2
+                            
+                            #self.stab_damage -= self.stab_damage
+                        if rpg.stab_sound_limit > 0:
+                                pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.stab_sound)
+                                rpg.overlay.create_damage_for_overlay(self.stab_damage*2,self.rect_attack_down.center,'purple')
+                                rpg.stab_sound_limit -= 1
+                        self.stab_damage -= self.stab_damage
+                    #print('hit with attack')
+
                 if rpg.level_stuff.boss_type == 'wolf':
                     n = 0
                     m = len(rpg.level_stuff.level_1_boss.wolf_list) - 1
@@ -428,11 +492,58 @@ class Player(Sprite,Physics_stats):
             if self.throw_timer_delay <= 0:
                 self.throw_timer_delay = self.throw_timer_delay_old
 
-
     def attack_cycle(self,rpg):
         """This will be the loops for the attack animation and damage"""
         self.check_health(rpg)
         keys = pygame.key.get_pressed()
+        if keys[pygame.K_j]: # J
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+            #rpg.overlay.create_damage_for_overlay(rpg.level_stuff.particle_list_1[1].damage,rect_particle.center,'cyan')
+        if keys[pygame.K_k]: # K
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_h]: # H
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_b]: # B
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_l]: # L
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_q]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_e]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_z]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_x]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_c]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_f]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_CAPSLOCK]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_CAPSLOCK]:
+            self.health -= 1
+            rpg.overlay.create_damage_for_overlay(1,self.rect_2.center,'red')
+        if keys[pygame.K_o]:
+            #print('You pressed o')
+            self.prep_mis_click_o_exit(rpg)
+            self.draw_misclick_message()
+            pygame.display.update()
+            pygame.time.delay(5000)
+            rpg.game = False
+
         if keys[pygame.K_n]:
             """n will be for attack direct 1 for now."""
             if self.attack_active == False and self.block_active == False:
@@ -455,6 +566,16 @@ class Player(Sprite,Physics_stats):
             if self.attack_direct_1_counter <= 0:
                 self.attack_direct_1_counter = self.attack_direct_1_counter_old
     
+    def prep_mis_click_o_exit(self,rpg):
+        """When the player pressed o this will display a message explaining what happened."""
+        self.misclick_message = rpg.font.render("You pressed 'o', you lose, exiting now.",True,rpg.text_color,'White')
+        self.misclick_message_rect = self.misclick_message.get_rect()
+        self.misclick_message_rect.center = rpg.screen_rect.center
+        
+    def draw_misclick_message(self):
+        """This displays the message."""
+        self.screen.blit(self.misclick_message,self.misclick_message_rect)
+
     def prep_game_over(self,rpg):
         game_over_words = 'Game Over!'
         self.game_over = rpg.font.render(game_over_words,True,rpg.text_color,'red')
@@ -474,18 +595,22 @@ class Player(Sprite,Physics_stats):
                 self.armor = 1
                 self.friction_slowdown = 0.9
             
-
-
     def check_health(self,rpg):
         """This checks the player health to see if the player loses"""
-        if self.health <= 0:
+        if self.health <= 0 and self.extra_life_invoked == False:
+
             rpg.high_score_stuff.add_score(rpg.level_stuff.player_1.score) # this adds the score.
+            rpg.high_score_stuff.update_top_scores()
+            rpg.high_score_stuff.save_top_scores(rpg)
             
             #self.screen.blit(self.game_over,self.game_over_rect)
             #rpg.campagne_mode = False
             #rpg.game_over_screen = True
             pygame.mouse.set_visible(True)
             self.death_animation_active = True
+        if self.health <= 0 and self.extra_life_invoked:
+            self.health = 100
+            self.extra_life_invoked = False
     
     def draw_for_credits(self,x,y):
         """This draws the player on screen for a cut scene"""
@@ -728,13 +853,11 @@ class Player(Sprite,Physics_stats):
         #pygame.draw.ellipse(self.screen,(2,48,32),self.rect)
         #self.screen.blit(self.shadow_surface,self.rect)
         self.screen.blit(self.sprite_sheet_player_1.surface_list[self.animation_counter],self.rect_2)
-        x_distance =  rpg.level_stuff.level_1_boss.rect_2.centerx - self.rect.centerx 
-        y_distance =  rpg.level_stuff.level_1_boss.rect_2.centery - self.rect.centery 
+        #x_distance =  rpg.level_stuff.level_1_boss.rect_2.centerx - self.rect.centerx 
+        #y_distance =  rpg.level_stuff.level_1_boss.rect_2.centery - self.rect.centery 
         #pygame.draw.line(self.screen,'white',self.rect.center,(self.rect.centerx + (x_distance / 100),self.rect.centery + (y_distance / 100)))
         #pygame.draw.rect(self.screen,(0,0,200),self.rect_2)
         #pygame.draw.rect(self.screen,(0,200,200),self.rect)
-
-        
 
     def attack_animation(self,rpg):
         """this will be the logic for the attack animation"""
@@ -746,6 +869,7 @@ class Player(Sprite,Physics_stats):
             if rpg.level_stuff.sound_logic.grunt_sound.get_volume() > rpg.settings_hold.max_volume:
                 rpg.level_stuff.sound_logic.grunt_sound.set_volume(rpg.settings_hold.max_volume)
             pygame.mixer.Sound.play(rpg.level_stuff.sound_logic.grunt_sound)
+
 
 
 class NPC_character(Sprite,Physics_stats):
@@ -772,7 +896,6 @@ class NPC_character(Sprite,Physics_stats):
         self.text_color_character = (255,255,255)
         self.bg_color_character = (0,0,0)
 
-    
     def prepare_text(self,rpg,index_to_prep):
         """this prepares the text for display."""
         length_text = len(self.text[index_to_prep])

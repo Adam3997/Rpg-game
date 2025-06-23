@@ -1,7 +1,7 @@
 from enemy_logic import Overworld_person
 from in_game_items import In_game_items
 from story_text import Story_text
-from info_overlay import Info_overlay
+#from info_overlay import Info_overlay
 from trees_builder import Tree_collection
 from boss import Boss
 from physics import Physics
@@ -20,11 +20,13 @@ from boss import Wolf_boss
 from in_game_items import generic_items
 from town import Town
 from enemy_intelligence import History_for_AI
+#from wolf import Golem
+
 
 
 
 class Level_logic():
-    """"""
+    """This holds the logic that organizes the levels. There are 6 levels. """
 
     def __init__(self,rpg):
         """Initialize the variable"""
@@ -67,7 +69,7 @@ class Level_logic():
 
         self.play_sound = True
 
-        self.generic_items = generic_items(rpg,50)
+        self.generic_items = generic_items(rpg,50,'normal')
 
         self.map_color = (150,105,25)
         self.map_size = 200
@@ -80,6 +82,8 @@ class Level_logic():
 
 
         self.town_1 = Town(rpg,(1000,1000))
+
+        self.level_design = Level_design(rpg)
 
 
         self.base_difficult = 1.0
@@ -205,7 +209,7 @@ class Level_logic():
     
     def load_level_1(self,rpg):
         """creates objects for level"""
-
+        self.level_design.setup_forest_level()
         self.map = In_game_map(rpg,self.map_size,self.map_size,self.map_color)
         self.physics_active = Physics(self)
         self.tree_set = Tree_collection(self,400,20000,20000)
@@ -219,7 +223,7 @@ class Level_logic():
         #self.boss_type = 'wolf'
         self.cloud_stuff =  Clouds(rpg,50)
 
-        self.generic_items = generic_items(rpg,50)
+        self.generic_items = generic_items(rpg,50,'normal')
 
         #self.town_1 = Town(rpg,(2000,2000))
         #self.town_exists = True
@@ -236,6 +240,7 @@ class Level_logic():
             spot_x = random.randint(-8000,8000)
             spot_y = random.randint(-8000,8000)
             n = random.choice([Wolf(rpg,(spot_x,spot_y),'lone'),Overworld_person(rpg,'spider'),Overworld_person(rpg,'spider'),Overworld_person(rpg,'spider')])
+            #n = Golem(rpg,(200,200),100)
             #n = Overworld_person(self,'spider')
             #n = Wolf(rpg)
             #n = Overworld_person(rpg) # i changed this from self to rpg, i hope nothing breaks
@@ -262,17 +267,19 @@ class Level_logic():
     
     def load_level_2(self,rpg):
         """this will be level 2"""
+        self.level_design.setup_lava_level()
+        self.level_design.load_objects_for_lava_level(700,20000)
         self.map = In_game_map(rpg,self.map_size,self.map_size,self.map_color)
         self.physics_active = Physics(self)
-        self.tree_set = Tree_collection(self,400,20000,20000)
-        self.grass_decorations = Grass_Sprites(rpg,200)
+        #self.tree_set = Tree_collection(self,400,20000,20000)
+        #self.grass_decorations = Grass_Sprites(rpg,200)
         self.story = Story_text(rpg)
         self.story.setup_second_story()
         self.level_1_boss = Boss(self,2000,10000,5000,9000,False,'two','regular')
         self.cloud_stuff =  Clouds(rpg,50)
         self.boss_type = 'spider'
 
-        self.generic_items = generic_items(rpg,50)
+        #self.generic_items = generic_items(rpg,50,'normal')
 
         self.ritual_logic = Ritual_recipe(rpg)
         self.level_2 = True
@@ -315,6 +322,7 @@ class Level_logic():
 
     def load_level_3(self,rpg):
         """"""
+        self.level_design.setup_forest_level()
         self.map = In_game_map(rpg,self.map_size,self.map_size,self.map_color)
         self.physics_active = Physics(self)
         self.tree_set = Tree_collection(self,400,20000,20000)
@@ -325,7 +333,7 @@ class Level_logic():
         self.cloud_stuff =  Clouds(rpg,50)
         self.boss_type = 'spider'
 
-        self.generic_items = generic_items(rpg,50)
+        self.generic_items = generic_items(rpg,50,'normal')
 
         self.ritual_logic = Ritual_recipe(rpg)
 
@@ -365,6 +373,7 @@ class Level_logic():
     
     def load_level_4(self,rpg):
         """"""
+        self.level_design.setup_forest_level()
         self.map = In_game_map(rpg,self.map_size,self.map_size,self.map_color)
         self.physics_active = Physics(self)
         self.tree_set = Tree_collection(self,400,20000,20000)
@@ -375,7 +384,7 @@ class Level_logic():
         self.cloud_stuff =  Clouds(rpg,50)
         self.boss_type = 'spider'
 
-        self.generic_items = generic_items(rpg,50)
+        self.generic_items = generic_items(rpg,50,'normal')
 
         self.ritual_logic = Ritual_recipe(rpg)
         self.level_4 = True
@@ -418,6 +427,7 @@ class Level_logic():
 
     def load_level_5(self,rpg):
         """"""
+        self.level_design.setup_forest_level()
         self.map = In_game_map(rpg,self.map_size,self.map_size,self.map_color)
         self.physics_active = Physics(self)
         self.tree_set = Tree_collection(self,400,20000,20000)
@@ -428,7 +438,7 @@ class Level_logic():
         self.cloud_stuff =  Clouds(rpg,50)
         self.boss_type = 'wolf'
 
-        self.generic_items = generic_items(rpg,50)
+        self.generic_items = generic_items(rpg,5,'normal')
 
         self.ritual_logic = Ritual_recipe(rpg)
         self.level_5 = True
@@ -443,9 +453,10 @@ class Level_logic():
             
             spot_x = random.randint(-8000,8000)
             spot_y = random.randint(-8000,8000)
-            n = random.choice([Wolf(rpg,(spot_x,spot_y),'lone'),Overworld_person(rpg,'spider'),Overworld_person(rpg,'spider'),Overworld_person(rpg,'spider')])
-            
-            
+            #n = random.choice([Wolf(rpg,(spot_x,spot_y),'lone'),Golem(rpg,(200,200),100),Golem(rpg,(200,200),100),Golem(rpg,(200,200),100),Overworld_person(rpg,'spider'),Overworld_person(rpg,'spider')])
+            #n = Golem(rpg,(200,200),100)
+            n = random.choice([Wolf(rpg,(spot_x,spot_y),'lone'),Overworld_person(rpg,'spider'),Overworld_person(rpg,'spider')])
+            #
             #n = Overworld_person(self,'spider')
             n.id_number = enemy_count
             #m = Character(self,10,10,10,10,50)
@@ -472,6 +483,7 @@ class Level_logic():
 
     def load_level_6(self,rpg):
         """"""
+        self.level_design.setup_forest_level()
         self.map = In_game_map(rpg,self.map_size,self.map_size,self.map_color)
         self.physics_active = Physics(self)
         self.tree_set = Tree_collection(self,400,20000,20000)
@@ -482,7 +494,7 @@ class Level_logic():
         self.cloud_stuff =  Clouds(rpg,50)
         self.boss_type = 'spider'
 
-        self.generic_items = generic_items(rpg,50)
+        self.generic_items = generic_items(rpg,50,'normal')
 
         self.ritual_logic = Ritual_recipe(rpg)
         self.level_6 = True
@@ -520,3 +532,151 @@ class Level_logic():
         self.item_list.append(w)
         w = In_game_items(self,'pillar')
         self.item_list.append(w)
+
+
+class Loading_screen_and_logic():
+    """This class holds the logic for the loading screen and anything else as needed."""
+    def __init__(self,rpg):
+        """temp"""
+        self.screen = rpg.screen
+        self.screen_rect = self.screen.get_rect()
+
+        self.loading_screen_color = (138,154,91)
+
+        self.loading_screen_font_color = (54,69,79)
+
+        self.loading_screen_font = pygame.font.SysFont('vinerhanditc',90)
+
+        self.loading_words = self.loading_screen_font.render('Loading...',True,self.loading_screen_font_color,self.loading_screen_color)
+        self.loading_words_rect = self.loading_words.get_rect()
+        self.loading_words_rect.center = self.screen_rect.center
+
+    
+    def draw_loading_screen(self):
+        """This draws the loading screen for the player to look at."""
+        self.screen.fill(self.loading_screen_color)
+        self.screen.blit(self.loading_words,self.loading_words_rect)
+
+
+
+
+class Level_design():
+    """This will hold the specific info for having 2 different level types. 
+    The two types will be a forest, and the lava level. """
+
+
+    def __init__(self,rpg):
+        self.screen = rpg.screen
+        self.screen_rect = rpg.screen.get_rect()
+
+
+        #self.lava_level_background_color = (110,38,14) # this is burnt umber
+        #self.lava_level_background_color = (54,69,79) # this is charcoal
+        #self.lava_level_background_color = (57,53,53) 
+        #self.lava_level_background_color = (53,57,53) # onyx
+        self.lava_level_background_color = (15,5,2) 
+
+        self.forest_level_background_color = (47,129,54)
+
+        self.current_background_color = self.forest_level_background_color
+
+        self.level_type = 'forest'
+
+        self.rocks_list = []
+        self.rocks_rect_list = []
+
+        self.lava_list = []
+        self.lava_rect_list = []
+
+        self.lava_damage_rect_list = []
+        self.damage_delay = 5
+        self.damage_delay_old = self.damage_delay
+
+        
+
+        #
+    
+    def draw_objects_for_lava_level(self,rpg):
+        """This draws the objects for the lava level"""
+        self.check_for_lava_damage(rpg)
+        if self.damage_delay != 5:
+            self.damage_delay -= 1
+            if self.damage_delay <= 0:
+                self.damage_delay = self.damage_delay_old
+        
+        n = 0
+        m = len(self.lava_list)
+        while n < m:
+            self.screen.blit(self.lava_list[n],self.lava_rect_list[n])
+            self.screen.blit(self.rocks_list[n],self.rocks_rect_list[n])
+            #pygame.draw.rect(self.screen,'red',self.lava_damage_rect_list[n])
+
+
+            n += 1
+
+    def check_for_lava_damage(self,rpg):
+        """This checks if the lava damages the player."""
+        n = 0
+        m = len(self.lava_damage_rect_list)
+        while n < m:
+
+            collisions_test  = pygame.Rect.colliderect(self.lava_damage_rect_list[n],rpg.level_stuff.player_1.rect)
+            if collisions_test:
+                """"""
+                if self.damage_delay == 5:
+                    rpg.level_stuff.player_1.health -= 1
+                    rpg.overlay.create_damage_for_overlay(1,rpg.level_stuff.player_1.rect.center,'red')
+                    self.damage_delay -= 1
+                
+            n += 1
+
+    def load_objects_for_lava_level(self,amount,max_distance_to_spawn):
+        """This loads up the rocks and lava for the lava level."""
+
+        n = 0
+        while n <= amount//2:
+            m = random.choice([pygame.image.load("_internal\\img\\lava_1.png"),pygame.image.load("_internal\\img\\lava_2.png"),pygame.image.load("_internal\\img\\lava_3.png")])
+            m = pygame.transform.scale_by(m,3)
+            
+            image_temp = m
+            rect_temp = image_temp.get_rect()
+            rect_temp.center = ((random.randrange(-max_distance_to_spawn//2,max_distance_to_spawn//2)),(random.randrange(-max_distance_to_spawn//2,max_distance_to_spawn//2)))
+
+            damage_rect_temp = pygame.Rect.scale_by(rect_temp,0.6)
+            
+            self.lava_list.append(image_temp)
+            self.lava_rect_list.append(rect_temp)
+            self.lava_damage_rect_list.append(damage_rect_temp)
+
+            n += 1
+
+        n = 0
+        while n <= amount//2:
+            m = random.choice([pygame.image.load("_internal\\img\\rubble_1.png"),pygame.image.load("_internal\\img\\rubble_2.png"),pygame.image.load("_internal\\img\\rubble_3.png"),pygame.image.load("_internal\\img\\rubble_4.png"),pygame.image.load("_internal\\img\\rubble_5.png")])
+            #m = pygame.transform.scale_by(m,3)
+            
+            image_temp = m
+            rect_temp = image_temp.get_rect()
+            rect_temp.center = ((random.randrange(-max_distance_to_spawn//2,max_distance_to_spawn//2)),(random.randrange(-max_distance_to_spawn//2,max_distance_to_spawn//2)))
+
+            #damage_rect_temp = pygame.Rect.scale_by(rect_temp,0.6)
+            
+            self.rocks_list.append(image_temp)
+            self.rocks_rect_list.append(rect_temp)
+            
+
+            n += 1
+    
+    def setup_forest_level(self):
+        """This sets up the forest level."""
+        self.current_background_color = self.forest_level_background_color
+        self.level_type = 'forest'
+
+
+    
+
+    def setup_lava_level(self):
+        """This sets up the lava level. """
+        self.current_background_color = self.lava_level_background_color
+        self.level_type = 'lava'
+        

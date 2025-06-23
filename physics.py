@@ -230,6 +230,21 @@ class Physics():
         rpg.level_stuff.player_1.map_x_location += (rpg.level_stuff.player_1.velocity[0] * rpg.dt)
         rpg.level_stuff.player_1.map_y_location += (rpg.level_stuff.player_1.velocity[1] * rpg.dt)
         
+    def update_lava(self,rpg):
+        """This updates the lava on the screen when the player moves. """
+
+        n = 0
+        m = len(rpg.level_stuff.level_design.lava_rect_list)
+        while n < m:
+            rpg.level_stuff.level_design.lava_rect_list[n].x -= rpg.level_stuff.player_1.velocity[0] * rpg.dt
+            rpg.level_stuff.level_design.lava_rect_list[n].y -= rpg.level_stuff.player_1.velocity[1] * rpg.dt
+            rpg.level_stuff.level_design.lava_damage_rect_list[n].x -= rpg.level_stuff.player_1.velocity[0] * rpg.dt
+            rpg.level_stuff.level_design.lava_damage_rect_list[n].y -= rpg.level_stuff.player_1.velocity[1] * rpg.dt
+            rpg.level_stuff.level_design.rocks_rect_list[n].x -= rpg.level_stuff.player_1.velocity[0] * rpg.dt
+            rpg.level_stuff.level_design.rocks_rect_list[n].y -= rpg.level_stuff.player_1.velocity[1] * rpg.dt
+            n += 1
+
+
 
     def update_enemy_test2(self,rpg):
         """This moves the enemy when the player moves. This simulates player movement."""
@@ -256,6 +271,15 @@ class Physics():
 
             rpg.level_stuff.enemy_list[n].rect_attack_up.y -= rpg.level_stuff.player_1.velocity[1]* rpg.dt
             rpg.level_stuff.enemy_list[n].rect_attack_up.x -= rpg.level_stuff.player_1.velocity[0]* rpg.dt
+
+            if rpg.level_stuff.enemy_list[n].type_of_character == 'golem':
+                i = 0
+                j = len(rpg.level_stuff.enemy_list[n].fire_ball_list_aoe)
+                while i < j:
+                    rpg.level_stuff.enemy_list[n].fire_ball_list_aoe[i].fire_ball_rect.x -=  (rpg.level_stuff.player_1.velocity[0] * rpg.dt)
+                    rpg.level_stuff.enemy_list[n].fire_ball_list_aoe[i].fire_ball_rect.y -= (rpg.level_stuff.player_1.velocity[1] * rpg.dt)
+                    i += 1
+            
 
             
         
@@ -294,6 +318,8 @@ class Physics():
 
     def update_boss(self,rpg):
         """this moves the boss and its components when player moves"""
+        rpg.level_stuff.level_1_boss.weakness_rect.x -= (rpg.level_stuff.player_1.velocity[0] * rpg.dt)
+        rpg.level_stuff.level_1_boss.weakness_rect.y -= (rpg.level_stuff.player_1.velocity[1] * rpg.dt)
 
         rpg.level_stuff.level_1_boss.rect.x -= (rpg.level_stuff.player_1.velocity[0] * rpg.dt)
         rpg.level_stuff.level_1_boss.rect.y -= (rpg.level_stuff.player_1.velocity[1] * rpg.dt)
@@ -471,8 +497,12 @@ class Physics():
         """This holds the final momentum logic"""
         rpg.level_stuff.player_1.update_speed_stats(rpg)
         self.update_enemy_test2(rpg)
-        self.update_trees_2(rpg)
-        self.update_grass(rpg) 
+        if rpg.level_stuff.level_design.level_type == 'forest':
+            self.update_trees_2(rpg)
+            self.update_grass(rpg) 
+        if rpg.level_stuff.level_design.level_type == 'lava':
+            """temp"""
+
         self.update_items(rpg)
         rpg.level_stuff.cloud_stuff.move_clouds_for_player(rpg)
         rpg.overlay.update_damage(rpg) 

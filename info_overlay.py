@@ -93,7 +93,7 @@ class Info_overlay():
 
 
     def update_damage(self,rpg):
-        """This updates the damage"""
+        """This updates the damage list which holds all the damage info that is put on screen."""
 
         n = 0
         m = len(self.damage_list_rects)- 1
